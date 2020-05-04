@@ -7,13 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   
+  
   <link rel="shortcut icon" href="../img/favicon.ico">
   <title>Plugin Developer Guide - Hobbits</title>
-  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
 
-  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
   
   <script>
     // Current page data
@@ -24,7 +25,7 @@
   
   <script src="../js/jquery-2.1.1.min.js" defer></script>
   <script src="../js/modernizr-2.8.3.min.js" defer></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script> 
   
 </head>
@@ -35,6 +36,7 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
         <a href=".." class="icon icon-home"> Hobbits</a>
         <div role="search">
@@ -45,47 +47,56 @@
       </div>
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-	<ul class="current">
-	  
-          
-            <li class="toctree-l1">
-		
-    <a class="" href="..">Overview</a>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <a class="" href="../user-guide/">User Guide</a>
-	    </li>
-          
-            <li class="toctree-l1 current">
-		
-    <a class="current" href="./">Plugin Developer Guide</a>
-    <ul class="subnav">
-            
-    <li class="toctree-l2"><a href="#hobbits-plugin-development">Hobbits Plugin Development</a></li>
-    
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../user-guide/">User Guide</a>
+                    </li>
+                </ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Plugin Developer Guide</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#example-plugin-development-video">Example Plugin Development Video</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#general-terms-and-concepts">General Terms and Concepts</a>
         <ul>
-        
-            <li><a class="toctree-l3" href="#example-plugin-development-video">Example Plugin Development Video</a></li>
-        
-            <li><a class="toctree-l3" href="#general-terms-and-concepts">General Terms and Concepts</a></li>
-        
-            <li><a class="toctree-l3" href="#specific-interfaces">Specific Interfaces</a></li>
-        
-            <li><a class="toctree-l3" href="#helpful-tools">Helpful Tools</a></li>
-        
-            <li><a class="toctree-l3" href="#get-in-touch">Get in touch</a></li>
-        
+    <li class="toctree-l3"><a class="reference internal" href="#qt-plugin-api">Qt Plugin API</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#bit-containers">Bit Containers</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#common-plugin-interface-methods">Common Plugin Interface Methods</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#plugin-state">Plugin State</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#action-progress">Action Progress</a>
+    </li>
         </ul>
-    
-
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#specific-interfaces">Specific Interfaces</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#operator-interface">Operator Interface</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#analyzer-interface">Analyzer Interface</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#display-interface">Display Interface</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#importexport-interface">Import/Export Interface</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#helpful-tools">Helpful Tools</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#get-in-touch">Get in touch</a>
+    </li>
     </ul>
-	    </li>
-          
-        </ul>
+                    </li>
+                </ul>
       </div>
-      &nbsp;
+    </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -110,6 +121,7 @@
       
     </li>
   </ul>
+  
   <hr/>
 </div>
           <div role="main">
@@ -293,11 +305,11 @@ or ask about it on <a href="https://discord.gg/wRQJpZZ">the Discord channel</a><
   <div role="contentinfo">
     <!-- Copyright etc -->
     
-      <p>2020 Mahlet, Inc.</p>
+      <p>© 2020 Mahlet, Inc.</p>
     
   </div>
 
-  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
       
         </div>
@@ -307,7 +319,7 @@ or ask about it on <a href="https://discord.gg/wRQJpZZ">the Discord channel</a><
 
   </div>
 
-  <div class="rst-versions" role="note" style="cursor: pointer">
+  <div class="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
@@ -320,6 +332,11 @@ or ask about it on <a href="https://discord.gg/wRQJpZZ">the Discord channel</a><
     <script src="../js/theme.js" defer></script>
       <script src="../js/youtube.js" defer></script>
       <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
 
 </body>
 </html>
