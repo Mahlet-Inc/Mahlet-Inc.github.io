@@ -189,6 +189,10 @@ showing the most important charactaristics of different types of data.</p>
 <li>Binary: shows frames of bits as lines of binary digits</li>
 <li>Hex: shows frames of bits as lines of hexadecimal digits</li>
 <li>ASCII: shows frames of bits as lines of decoded ASCII text</li>
+<li>Digraph Plot: shows byte adjacency patterns</li>
+<li>Dot Plot: shows byte repetition patterns</li>
+<li>Hilbert Plot: shows byte sections in visibly delineated chunks</li>
+<li>Frequency Plot: shows a histogram of the most common bytes</li>
 </ul>
 <h3 id="analyzers">Analyzers</h3>
 <p>Analyzers digest and decorate the data in a way that facilitates follow-on
@@ -197,8 +201,8 @@ processing and/or human evaluation. Analyzers are non-destructive.</p>
 <li>Find: finds and navigates to bit, hex, octal, and ASCII patterns in the data</li>
 <li>Width Framer: frames the data to given bit-width. Includes an
    auto-correlation function and width-picker graph.</li>
-<li>Header Framer: frames the data on a given constant header sequence</li>
-<li>Flexible Framer: frames data based on a regular-expression-like frame syntax</li>
+<li>Kaitai Struct: highlights the data sections based on a known/specified binary
+   format</li>
 </ul>
 <h3 id="operators">Operators</h3>
 <p>Operators take some number of data inputs, and produce some number of data
@@ -212,11 +216,23 @@ can still be easily referenced.</p>
 <li>Bit Error: injects bit errors into the data</li>
 <li>LFSR: generates LFSR bits based on given parameters</li>
 <li>QAM Remapper: maps n-bit "symbols" to other n-bit "symbols"</li>
+<li>Header Framer: frames the data on a given constant header sequence</li>
+</ul>
+<h3 id="importerexporters">Importer/Exporters</h3>
+<p>Importer/Exporters are the primary way to get bitstreams in and out of hobbits.</p>
+<ul>
+<li>File Data: import bits from or export bits to a file on the filesystem</li>
+<li>HTTP Data: import bits from or export bits to an HTTP URL</li>
+<li>Hex String: import bits from or export bits to an ASCII string of hex
+   characters that represent the bits</li>
+<li>TCP Data: import bits by listening for TCP data on a specified port, or
+   export bits to a TCP server at a specified address</li>
 </ul>
 <h2 id="templates">Templates</h2>
 <p>When a user develops a sequence of operations that they want to perform
 frequently, they can save it as a "Template" and perform it later with a single
-step.</p>
+step. Templates can also be used to process bits on the command line with the
+hobbits-runner CLI.</p>
 <h1 id="technical-architecture">Technical Architecture</h1>
 <p>The rest of this document covers the technical architecture of the Hobbits 
 platform.</p>
@@ -266,6 +282,9 @@ enables useful integration between plugins.</p>
 speed and ease. Adding new plugins needs to be fast and painless. The simplicity
 of the essential interface components helps with this, but the core library
 utilities and the plugin templates are also very important.</p>
+<p>Finally, a plugin system allows Mahlet (or any other organization) to develop
+plugins that can be used internally, or licensed and sold separately from the
+core Hobbits open-source project.</p>
 <h3 id="core-library">Core Library</h3>
 <p>The core library's main purpose is to provide useful tools and abstractions for
 the plugin implementations. This includes ways of accessing and operating on
@@ -284,18 +303,11 @@ abstractions of the Qt plugin loader, there is still a small amount of
 boilerplate code required when making a plugin. This boilerplate code can be
 annoying to experienced developers, and it can be intimidating to developers
 that are unfamiliar with the program.</p>
-<p>Templates, in the form of both Qt Creator wizards and Python cookiecutters, are
+<p>Templates, in the form of Qt Creator wizards, are
 available to set up all of the boilerplate code required to make a functioning
 plugin. This dramatically speeds up the development of new plugins, especially
-simple plugins, and plugins that simply wrap existing C/C++ processing
+simple plugins, and plugins that just wrap existing C/C++ processing
 capabilities.</p>
-<h3 id="conan">Conan</h3>
-<p>Hobbits currently uses the C/C++ package manager "Conan" in its building and
-dependency management process. Conan works similarly to Python's pip, and
-Node.js's npm in that it creates clear dependency plans that simplify the build
-process when you are using external dependencies. It currently enables plugin
-developers to write and build their plugins without needing to set up Qt or
-Hobbits.</p>
               
             </div>
           </div>
@@ -337,6 +349,7 @@ Hobbits.</p>
 </div>
     <script>var base_url = '.';</script>
     <script src="js/theme.js" defer></script>
+      <script src="js/youtube.js" defer></script>
       <script src="search/main.js" defer></script>
 
 </body>
@@ -344,5 +357,5 @@ Hobbits.</p>
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2020-02-07 18:25:07
+Build Date UTC : 2020-05-04 17:54:29
 -->

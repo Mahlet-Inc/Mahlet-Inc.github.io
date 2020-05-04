@@ -62,7 +62,11 @@
     
         <ul>
         
+            <li><a class="toctree-l3" href="#example-usage-video">Example Usage Video</a></li>
+        
             <li><a class="toctree-l3" href="#gui-layout">GUI Layout</a></li>
+        
+            <li><a class="toctree-l3" href="#preferences-menu">Preferences Menu</a></li>
         
             <li><a class="toctree-l3" href="#bit-containers">Bit Containers</a></li>
         
@@ -72,9 +76,13 @@
         
             <li><a class="toctree-l3" href="#analyzers">Analyzers</a></li>
         
+            <li><a class="toctree-l3" href="#importerexporters">Importer/Exporters</a></li>
+        
             <li><a class="toctree-l3" href="#command-line-execution">Command line execution</a></li>
         
             <li><a class="toctree-l3" href="#plugin-loading">Plugin loading</a></li>
+        
+            <li><a class="toctree-l3" href="#get-in-touch">Get in touch</a></li>
         
         </ul>
     
@@ -124,6 +132,8 @@
 fully integrated set of tools for preprocessing, analyzing, and displaying data
 in a variety of ways. This guide explains how to use the different features of
 the Hobbits GUI, and then presents a few example workflows.</p>
+<h2 id="example-usage-video">Example Usage Video</h2>
+<p><img alt="YOUTUBE" src="6ygkhze36qM" /></p>
 <h2 id="gui-layout">GUI Layout</h2>
 <p><img alt="The Hobbits GUI" src="../labelled_hobbits_screenshot.png" /></p>
 <ol>
@@ -133,6 +143,9 @@ the Hobbits GUI, and then presents a few example workflows.</p>
 <li>Controls for the Displays</li>
 <li>Operator Panel</li>
 </ol>
+<h2 id="preferences-menu">Preferences Menu</h2>
+<p>Navigating to <code>Edit-&gt;Preferences...</code> opens the preferences dialog where the
+application configuration can be viewed and editted.</p>
 <h2 id="bit-containers">Bit Containers</h2>
 <p>Hobbits organizes imported data into "bit containers" that appear in a 
 collapsible panel on the left side of the GUI by default. The panel's visibility
@@ -192,10 +205,18 @@ the Width Framer to discover appropriate frame widths for data, and then apply
 one of those widths to the container. You can use the Find analyzer to find
 instances of bit/byte/ASCII sequences in data, and then highlight and quickly
 navigate to them.</p>
+<h2 id="importerexporters">Importer/Exporters</h2>
+<p>Importer/Exporters appear in the <code>File-&gt;Import Bits From</code> and
+<code>File-&gt;Export Bits To</code> menus.</p>
+<p>Importer/Exporters are the primary way to get bitstreams in and out of hobbits.
+For example, if you want to open a file as bits, selecting the <code>File Data</code>
+import plugin will let you select a file and then load it in as a Bit Container.</p>
 <h2 id="command-line-execution">Command line execution</h2>
 <p>When running Hobbits from the command line, a variety of configuration and
 data loading options are provided. Simply run it with the <code>--help</code> option to see
 which options are available.</p>
+<p>The hobbits-runner program can be used to apply a saved Hobbits template to an
+input file without needing to open the GUI.</p>
 <h2 id="plugin-loading">Plugin loading</h2>
 <p>A standard Hobbits distributable binary comes with a set of core plugins that
 should load without any user configuration. However, if you want to use a
@@ -210,6 +231,11 @@ plugin that is not part of the core distribution, you can either:</p>
   ini file that can be found at <code>~/.config/Hobbits/Hobbits GUI.conf</code>, and the
   plugin path configuration is the <code>path</code> variable in the <code>[Plugins]</code> section.</li>
 </ul>
+<h2 id="get-in-touch">Get in touch</h2>
+<p>If you are having trouble using hobbits, or if you have a suggestion for hobbits
+or the documentation, please open an issue on
+<a href="https://github.com/Mahlet-Inc/hobbits/issues">the GitHub page</a>
+or ask about it on <a href="https://discord.gg/wRQJpZZ">the Discord channel</a></p>
               
             </div>
           </div>
@@ -255,6 +281,7 @@ plugin that is not part of the core distribution, you can either:</p>
 </div>
     <script>var base_url = '..';</script>
     <script src="../js/theme.js" defer></script>
+      <script src="../js/youtube.js" defer></script>
       <script src="../search/main.js" defer></script>
 
 </body>
