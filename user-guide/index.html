@@ -74,6 +74,8 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#batch-creation-and-execution">Batch Creation and Execution</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#command-line-execution">Command line execution</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#plugin-loading">Plugin loading</a>
@@ -204,11 +206,22 @@ navigate to them.</p>
 <p>Importer/Exporters are the primary way to get bitstreams in and out of hobbits.
 For example, if you want to open a file as bits, selecting the <code>File Data</code>
 import plugin will let you select a file and then load it in as a Bit Container.</p>
+<h2 id="batch-creation-and-execution">Batch Creation and Execution</h2>
+<p>Sequences of operator, analyzer, and importer actions can be saved as "batches"
+that can be executed all at once. You can combine and connect these actions in
+the Batch Editor by navigating to <code>File-&gt;Open Batch Editor</code>. Once you finish
+editing, you can save the batch to a file from the Batch Editor's menu at
+<code>File-&gt;Save Batch As...</code>.</p>
+<p>You can also create a batch by selecting either the container that starts an
+action sequence or the container that ends the sequence and then navigating to
+<code>File-&gt;Save Batch...</code>. This will prompt yout and then open the Batch Editor so
+that you can verify and save the batch.</p>
+<p>Saved batches can be executed via <code>File-&gt;Apply Batch...</code>.</p>
 <h2 id="command-line-execution">Command line execution</h2>
 <p>When running Hobbits from the command line, a variety of configuration and
 data loading options are provided. Simply run it with the <code>--help</code> option to see
 which options are available.</p>
-<p>The hobbits-runner program can be used to apply a saved Hobbits template to an
+<p>The hobbits-runner program can be used to apply a saved Hobbits batch to an
 input file without needing to open the GUI.</p>
 <h2 id="plugin-loading">Plugin loading</h2>
 <p>A standard Hobbits distributable binary comes with a set of core plugins that

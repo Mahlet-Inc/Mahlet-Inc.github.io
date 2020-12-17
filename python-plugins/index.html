@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Python Plugin Developer Guide - Hobbits</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Python Plugin Developer Guide";
+    var mkdocs_page_input_path = "python-plugins.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Hobbits</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../user-guide/">User Guide</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../plugin-developer-guide/">Plugin Developer Guide</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Hobbits</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Python Plugin Developer Guide</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="python-plugin-developer-guide">Python Plugin Developer Guide</h1>
+<p>Python plugins let you rapidly extend hobbits processing abilities with Python
+code. Hobbits has a built-in interpreter, and a Python API that allows you to
+process data at near-native speeds while still taking full advantage of the
+flexibility and power of Python.</p>
+<h2 id="basic-plugin-structure">Basic Plugin Structure</h2>
+<p>Plugins are broken into 2 main parts:</p>
+<ul>
+<li>A JSON file describing the plugin</li>
+<li>A Python script implementing the described plugin</li>
+</ul>
+<h2 id="plugin-installation">Plugin Installation</h2>
+<p>Python plugins can be installed in <code>python_displays</code>, <code>python_analyzers</code>,
+<code>python_operators</code>, or <code>python_importers</code> folders wherever hobbits searches for
+plugins (e.g. <code>~/.local/share/hobbits/plugins</code> or the <code>plugins</code> folder adjacent
+to the hobbits binary.) For example, you could add display plugin files like:</p>
+<pre><code>~/.local/share/hobbits/plugins/python_displays/MyPyDisplay/plugin.json
+~/.local/share/hobbits/plugins/python_displays/MyPyDisplay/plugin.py
+</code></pre>
+
+<h3 id="json-file-structure">JSON File Structure</h3>
+<p>The JSON file should provide the following fields:</p>
+<ul>
+<li><code>name</code> - the name of the plugin (string)</li>
+<li><code>description</code> - a brief description of the plugin (string)</li>
+<li><code>tags</code> - tags for categorizing the plugin (array of strings)</li>
+<li><code>script</code> - the name of the python file with the implementation code (string)</li>
+<li><code>type</code> - the type of the plugin (<code>"importer"</code>, <code>"operator"</code>, or <code>"analyzer"</code>)</li>
+<li><code>extra_paths</code> - directories on the local machine where supporting python
+ files/libraries can be found (array of strings)</li>
+<li><code>parameters</code> - the parameters that are required by the plugin. It is an
+ array of parameter objects, each of which contains a <code>name</code> field (string)
+ and a <code>type</code> field (<code>"string"</code>, <code>"integer"</code>, <code>"decimal"</code>, or <code>"boolean"</code>)</li>
+</ul>
+<p>Here's an example JSON file:</p>
+<pre><code>{
+    &quot;name&quot;: &quot;String Importer&quot;,
+    &quot;description&quot;: &quot;Simple example string importer&quot;,
+    &quot;tags&quot;: [&quot;Example&quot;],
+    &quot;script&quot;: &quot;plugin.py&quot;,
+    &quot;type&quot;: &quot;importer&quot;,
+    &quot;extra_paths&quot;: [],
+    &quot;parameters&quot;: [
+        {
+            &quot;name&quot;: &quot;my_string&quot;,
+            &quot;type&quot;: &quot;string&quot;
+        }
+    ]
+}
+</code></pre>
+
+<p>Display plugins can optionally set their <code>render_config</code> (default values shown):</p>
+<pre><code>{
+    ...
+    &quot;type&quot;: &quot;display&quot;,
+    &quot;render_config&quot;: {
+        &quot;asynchronous&quot;: true,
+        &quot;hide_bit_offset_controls&quot;: false,
+        &quot;hide_frame_offset_controls&quot;: false
+    },
+    ...
+}
+</code></pre>
+
+<h3 id="python-script-structure">Python Script Structure</h3>
+<p>The Python script must be valid Python, and it must define a valid entry point
+function based on the JSON configuration of the plugin. For example, a valid
+script for the "String Importer" above could be:</p>
+<pre><code>def import_bits(bits, info, my_string, progress):
+    bits.set_bytes(0, my_string.encode('ascii'))
+</code></pre>
+
+<p>In general terms, a Python plugin with a type of <code>"importer"</code> must have a function
+named <code>import_bits</code> that takes the following parameters (in order):</p>
+<ul>
+<li>A <code>hobbits.BitArray</code> that will be the imported bits</li>
+<li>A <code>hobbits.BitInfo</code> that will be the  imported bits info/metadata</li>
+<li>A parameter for each parameter object specified in the <code>"parameters"</code> array of the JSON configuration</li>
+<li>A <code>hobbits.ActionProgess</code> that can be used to update progress and check for cancellation</li>
+</ul>
+<p>Similarly, an <code>"analyzer"</code> type plugin must have a function named <code>analyze_bits</code>
+that takes:</p>
+<ul>
+<li>A <code>hobbits.ImmutableBitContainer</code> that will contain the bits and info to be analyzed</li>
+<li>A <code>hobbits.BitInfo</code> that will be the new info for the bits post-analysis</li>
+<li>A parameter for each parameter object specified in the <code>"parameters"</code> array of the JSON configuration</li>
+<li>A <code>hobbits.ActionProgess</code> that can be used to update progress and check for cancellation</li>
+</ul>
+<p>Similarly, an <code>"operator"</code> type plugin must have a function named <code>operate_on_bits</code>
+that takes:</p>
+<ul>
+<li>A <code>hobbits.ImmutableBitContainer</code> that will contain the bits and info to be operated on</li>
+<li>A <code>hobbits.BitArray</code> that will be the output bits of the operation</li>
+<li>A <code>hobbits.BitInfo</code> that will be the output bits info of the operation</li>
+<li>A parameter for each parameter object specified in the <code>"parameters"</code> array of the JSON configuration</li>
+<li>A <code>hobbits.ActionProgess</code> that can be used to update progress and check for cancellation</li>
+</ul>
+<p>A <code>"display"</code> type plugin must have a function named <code>render_display</code>
+that takes:</p>
+<ul>
+<li>A <code>hobbits.DisplayHandle</code> that will contain the bit container and offsets</li>
+<li>A <code>hobbits.ImageBuffer</code> that will have a size and should be filled with raw ARGB image data</li>
+<li>A parameter for each parameter object specified in the <code>"parameters"</code> array of the JSON configuration</li>
+<li>A <code>hobbits.ActionProgess</code> that can be used to update progress and check for cancellation</li>
+</ul>
+<h2 id="hobbits-python-api">Hobbits Python API</h2>
+<h3 id="hobbitsbitcontainer">hobbits.BitContainer</h3>
+<ul>
+<li><code>BitContainer.bits</code> gets a <code>hobbits.ImmutableBitArray</code></li>
+<li><code>BitContainer.info</code> gets a <code>hobbits.BitInfo</code></li>
+<li><code>hobbits.ImmutableBitContainer</code> returns a <code>hobbits.ImmutableBitInfo</code> for the <code>info</code> property</li>
+</ul>
+<h3 id="hobbitsbitarray">hobbits.BitArray</h3>
+<ul>
+<li><code>BitArray.size</code> returns the size of the <code>BitArray</code> in bits</li>
+<li><code>BitArray.at(i)</code> returns the value of the <code>i</code>th bit</li>
+<li><code>BitArray.resize(n)</code> resizes the <code>BitArray</code> to length <code>n</code></li>
+<li><code>BitArray.set(i, x)</code> sets the <code>i</code>th bit to boolean value <code>x</code></li>
+<li><code>BitArray.read_bytes(i, n)</code> reads <code>n</code> bytes starting from the <code>i</code>th byte and returns the value as a Python <code>bytearray</code></li>
+<li><code>BitArray.set_bytes(i, x)</code> writes <code>bytearray</code> <code>x</code> to the <code>BitArray</code> starting at the <code>i</code>th byte</li>
+<li><code>BitArray.write_to(fname)</code> writes the contents of the <code>BitArray</code> to a file named <code>fname</code></li>
+<li><code>BitArray.read_from(i, fname)</code> reads the contents of the file named <code>fname</code> into the <code>BitArray</code> starting at the <code>BitArray</code>'s <code>i</code>th byte</li>
+<li><code>hobbits.ImmutableBitArray</code> only supports <code>size</code>, <code>at</code>, <code>read_bytes</code>, and <code>write_to</code></li>
+</ul>
+<h3 id="hobbitsbitinfo">hobbits.BitInfo</h3>
+<ul>
+<li><code>BitInfo.set_metadata(key, value)</code> sets the metadata <code>key</code> to <code>value</code> (<code>key</code> and <code>value</code> are both strings)</li>
+<li><code>BitInfo.get_metadata(key)</code> gets the metadata value of <code>key</code> if it is set (returns empty string if not set)</li>
+<li><code>BitInfo.add_highlight(category, label, start, end, color=0x44ff8800)</code> adds a RangeHighlight from bit <code>start</code> to <code>end</code></li>
+<li>
+<p><code>BitInfo.get_highlights(category)</code> gets a list of all RangeHighlights of category <code>category</code></p>
+</li>
+<li>
+<p><code>hobbits.ImmutableBitInfo</code> only supports <code>get_metadata</code> and <code>get_highlights</code></p>
+</li>
+</ul>
+<h3 id="hobbitsactionprogess">hobbits.ActionProgess</h3>
+<ul>
+<li><code>ActionProgess.is_cancelled()</code> returns true if the plugin action was cancelled and should be aborted</li>
+<li><code>ActionProgress.set_progress_percent(x)</code> reports the progress of the plugin action as <code>x</code> out of 100</li>
+<li><code>ActionProgress.set_progress(x, n)</code> reports the progress of the plugin action as <code>x</code> out of <code>n</code></li>
+</ul>
+<h3 id="hobbitsdisplayhandle">hobbits.DisplayHandle</h3>
+<ul>
+<li><code>DisplayHandle.current_container</code> the <code>BitContainer</code> that should be displayed</li>
+<li><code>DisplayHandle.bit_offset</code> the current bit offset </li>
+<li><code>DisplayHandle.frame_offset</code> the current frame offset</li>
+<li><code>DisplayHandle.total_bit_offset</code> the total bit offset (start of offset frame + bit offset)</li>
+</ul>
+<h3 id="hobbitsimagebuffer">hobbits.ImageBuffer</h3>
+<ul>
+<li><code>ImageBuffer.set_bytes(x)</code> sets the image data to bytes-like object <code>x</code> (should be 4 * <code>width</code> * <code>height</code> long)</li>
+<li><code>ImageBuffer.width</code> width of the image (read-only)</li>
+<li><code>ImageBuffer.height</code> the height of the image (read-only)</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>© 2020 Mahlet, Inc.</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../js/youtube.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

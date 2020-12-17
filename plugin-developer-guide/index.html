@@ -66,13 +66,13 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#bit-containers">Bit Containers</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#common-plugin-interface-methods">Common Plugin Interface Methods</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#plugin-state">Plugin State</a>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters-delegates-and-editors">Parameters, Delegates, and Editors</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#action-progress">Action Progress</a>
+    <li class="toctree-l3"><a class="reference internal" href="#action-progress">Action Progress</a>
     </li>
-        </ul>
+    <li class="toctree-l3"><a class="reference internal" href="#threads">Threads</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#common-plugin-methods">Common Plugin Methods</a>
     </li>
         </ul>
     </li>
@@ -178,52 +178,52 @@ operator use <code>RangeHighlight</code>s for their processing.</p>
 the <code>BitInfo</code> directly. As a result, they must include
 a container's updated <code>BitInfo</code> in the
 <code>AnalyzerResult</code>s that they return.</p>
-<h3 id="common-plugin-interface-methods">Common Plugin Interface Methods</h3>
-<p>All of the plugin interfaces have a <code>getName</code> method that must return the name
-of that plugin as it should appear to the user. The name must be unique. There
-is also a common <code>createDefaultX</code> method (where X is the interface type) that
-simply returns a default instance of the plugin.</p>
-<p>The Analyzer and Operator interfaces have several simple methods in common:</p>
+<h3 id="parameters-delegates-and-editors">Parameters, Delegates, and Editors</h3>
+<p>Most plugins require customizable parameters in order to perform their function.
+Parameters are provided as <code>QJsonObject</code>s in the code so that they can be easily
+serialized. Most plugins provide a <code>ParameterDelegate</code> that provides details and
+validation capabilities for the JSON parameters, and optionally provides an
+implementation of <code>AbstractParameterEditor</code> for editing the parameters in a GUI.
+For most plugins, it is best to follow the pattern used in the Qt Creator plugin
+templates that does the following:</p>
 <ul>
-<li><code>applyToWidget</code> initializes the plugin's UI on a given widget</li>
-<li><code>provideCallback</code> gives the plugin a <code>PluginCallback</code> instance that can be
-   used to request that it gets executed (this is useful because the central
-   application that triggers plugin execution is decoupled from the plugin's UI,
-   so in order for a plugin to trigger execution when, for example, the "Enter"
-   key is pressed in its UI form, it needs to relay this request through the
-   <code>PluginCallback</code> instance it is given.)</li>
-<li><code>getStateFromUi</code> gets the plugin's current state/configuration based on how
-   its UI is filled out. If there are invalid or incomplete entries, the plugin
-   can return an empty state to indicate that it is not ready for execution.</li>
-<li><code>setPluginStateInUi</code> (conversely from <code>getStateFromUI</code>) is given a
-   pluginState, and it must fill out the UI in a way that would return that
-   state if <code>getStateFromUi</code> were called immediately afterwards</li>
-<li><code>canRecallPluginState</code> checks a plugin state to see if it can be used to
-   execute the plugin. If the state is empty or incomplete, it must return
-   false.</li>
-<li><code>previewBits</code> takes a read-only bit container and it can be used to prepare the
-   plugin for execution or enhance the UI options it presents. The Width Framer
-   analyzer plugins generates auto-correlation data in the <code>previewBits</code> method,
-   which is used to display a width-selector graph with suggested widths. It is
-   fine to leave this method's implementation empty.</li>
+<li>Create Qt Designed Form class that implementes <code>AbstractParameterEditor</code></li>
+<li>Use a <code>ParameterHelper</code> to wrap each of the UI elements for easy
+   <code>QJsonObject</code> getting and setting.</li>
+<li>Emit <code>AbstractParameterEditor</code>'s <code>changed</code> signal whenever the UI changes.</li>
+<li>If the editor needs to react to or enrich <code>BitContainer</code> metadata, implement
+   <code>previewBitsUiImpl</code>. <code>previewBitsImpl</code> can also be used for off-thread
+   pre-processing before <code>previewBitsUiImpl</code> is called.</li>
+<li>In the plugin implementation, create a list of <code>ParameterInfo</code>s that describe
+   the parameters.</li>
+<li>In the plugin implementation, create the plugin's <code>ParameterDelegate</code> with
+   <code>ParameterDelegate::create</code> using the <code>ParameterInfo</code> list, a <code>std::function</code>
+   that describes the plugin operation based on some parameter set, and another
+   <code>std::function</code> that returns the <code>AbstractParameterEditor</code> implementation.
+   This is the <code>ParameterDelegate</code> that would then get returned in, for example,
+   in <code>AnalyzerInterface::parameterDelegate</code>.</li>
 </ul>
-<h4 id="plugin-state">Plugin State</h4>
-<p>The plugin state contains parameters for how the plugin should run. For example,
-the Take Skip operator plugin will require a "take_skip_string" parameter to
-guide its execution. The state that it passed in can be provided by the plugin's
-own <code>getStateFromUi</code> method, or it can come from a saved template that was
-generated from a state returned by a plugin result (<code>OperatorResult</code> or
-<code>AnalyzerResult</code>.) Plugin results will usually just return the state that was
-passed in (e.g. <code>AnalyzerResult::result(bitInfo, recallablePluginState)</code>,) but
-sometimes
-that state needs to be enriched with execution details that were added by the
-plugin, such as a random number seed, so that the execution can be duplicated
-exactly with the returned state.</p>
-<h4 id="action-progress">Action Progress</h4>
-<p>The <code>ActionProgress</code> parameter is passed to the primary methods of the operator
-and analyzer interfaces. It allows a plugin to report its percentage progress as
-it executes, and allows it to check if it has been cancelled so that it can halt
-execution gracefully.</p>
+<h3 id="action-progress">Action Progress</h3>
+<p>The <code>ActionProgress</code> parameter is passed to some of the core plugin methods. It
+allows a plugin to report its percentage progress as it executes, and allows it
+to check if it has been cancelled so that it can halt execution gracefully. It
+is possible for this parameter to be null, so plugins should check for that.</p>
+<h3 id="threads">Threads</h3>
+<p>Many of the main plugin methods will be executed on secondary threads, separate
+from the the main Qt GUI thread. In those methods, it is important to avoid
+using general Qt GUI functionality (e.g. creating a <code>QMessageBox</code> pop-up) or the
+application might crash horribly. Read more about threads and Qt
+<a href="https://doc.qt.io/qt-5/thread-basics.html">here</a>.</p>
+<h3 id="common-plugin-methods">Common Plugin Methods</h3>
+<p>Hobbits plugins have a base abstract interface <code>HobbitsPlugin</code> with the
+following methods:</p>
+<ul>
+<li><code>name</code> returns a unique plugin name</li>
+<li><code>description</code> returns a description of the plugin</li>
+<li><code>tags</code> returns a list of categories that this plugin is affiliated with</li>
+</ul>
+<p>There is also a common <code>createDefaultX</code> method (where X is the interface type)
+that simply returns a default instance of the plugin.</p>
 <h2 id="specific-interfaces">Specific Interfaces</h2>
 <h3 id="operator-interface">Operator Interface</h3>
 <p>Operators take some number of data inputs, and produce some number of data
@@ -231,13 +231,12 @@ outputs. Most operators are 1-in, 1-out, but the flexibility of the interface
 enables several critical operations (e.g. data generators, muxes, demuxes.)
 The output of operators will go into new containers so that the original data
 can still be easily referenced.</p>
-<p><code>operateOnContainers</code> takes a list of read-only bit containers, a plugin state,
-and an <code>ActionProgress</code> instance. It returns an <code>OperatorResult</code> which contains
-any new bit containers that have been created by the operator, and the plugin
-state that will enable the operation to be duplicated exactly (see 
-<a href="#plugin-state">plugin state details above</a>.) <strong><code>operateOnContainers</code> might run
-in a separate thread from the main GUI thread, so you cannot use Qt features
-that depend on being in the main thread, e.g., showing a QMessageBox.</strong></p>
+<p><code>operateOnBits</code> takes a list of read-only bit containers, <code>QJsonObject</code>
+parameters, and an <code>ActionProgress</code> instance. It returns an <code>OperatorResult</code>
+which contains any new bit containers that have been created by the operator,
+and the <code>QJsonObject</code> parameters that will enable the operation to be duplicated
+exactly. This method may be executed on a secondary thread (see
+<a href="#threads">threads guidance above</a>)</p>
 <p><code>getMinInputContainers</code> and <code>getMaxInputContainers</code> return the minimum and
 maximum number of containers that the operator accepts as inputs. Operators that
 take a single input and produce a single output would simply return 1 for both
@@ -245,39 +244,50 @@ of these functions.</p>
 <h3 id="analyzer-interface">Analyzer Interface</h3>
 <p>Analyzers digest and decorate the data in a way that facilitates follow-on
 processing and/or human evaluation.</p>
-<p><code>analyzeBits</code> takes a read-only bit container, a plugin state, and an
+<p><code>analyzeBits</code> takes a read-only bit container, <code>QJsonObject</code> parameters, and an
 <code>ActionProgress</code> instance. It returns an <code>AnalyzerResult</code> which contains new
-general metadata and range entries for the container, and the plugin
-state that will enable the operation to be duplicated exactly (see 
-<a href="#plugin-state">plugin state details above</a>.) <strong><code>analyzeBits</code> might run in a
-separate thread from the main GUI thread, so you cannot use Qt features that
-depend on being in the main thread, e.g., showing a QMessageBox.</strong></p>
+general metadata and range entries for the container, and the <code>QJsonObject</code>
+parameters that will enable the operation to be duplicated exactly. This method
+may be executed on a secondary thread (see <a href="#threads">threads guidance above</a>)</p>
 <h3 id="display-interface">Display Interface</h3>
 <p>Displays show the data in some sort of useful format (e.g. a bit raster, or a
 hex dump.)  They can use metadata and highlights in bit containers to augment a
 depiction of the data, but they could also show <em>only</em> the metadata if that was
 useful somehow (e.g. if there were some metrics worth presenting separately from
 the plugin that generated them.)</p>
-<p><code>getDisplayWidget</code> and <code>getControlsWidget</code> provide the display and (optional)
-controls for a display plugin. They both take a <code>DisplayHandle</code> as their sole
-parameter.</p>
-<p>The <code>DisplayHandle</code> provides access to a variety of things that a display might
-need to access (e.g. the current bit container), or set (e.g. the bit that is
-currently being hovered over by the mouse.)</p>
+<p><code>renderConfig</code> returns a <code>DisplayRenderConfig</code> that provides some basic guidance
+on how the display should be rendered, for example, whether or not it should be
+rendered asynchronously on a secondary thread.</p>
+<p><code>setDisplayHandle</code> is how the plugin receives the shared <code>DisplayHandle</code> which
+provides access to a variety of things that a display might need to access (e.g.
+the current bit container), or set (e.g. the bit that is currently being hovered
+over by the mouse.) It also lets the display set things like the currently
+displayed range of bits with <code>DisplayHandle::setRenderedRange</code>.</p>
+<p><code>renderDisplay</code> is the primary display rendering function that takes the a
+viewport size, <code>QJsonObject</code> parameters, and an <code>ActionProgress</code> instance. It
+returns a <code>DisplayResult</code> which contains a <code>QImage</code> and the <code>QJsonObject</code>
+parameters that will enable the operation to be duplicated exactly. This method
+may be executed on a secondary thread (see <a href="#threads">threads guidance above</a>)</p>
+<p><code>renderOverlay</code> is similar to <code>renderDisplay</code>, but it does not receive an
+<code>ActionProgress</code>. An overlay is generally something that might get adjusted more
+frequently and separately from the main display, like a hover-over tooltip. It
+generally is not executed on a secondary thread, but it can be (for example in a
+<code>DisplayPrinter</code> exporter)</p>
 <h3 id="importexport-interface">Import/Export Interface</h3>
 <p>Import/Export plugins import and/or export bit containers for use in Hobbits.
-The simplest of these plugins is the "File Data" plugin that imports/exports
-raw binary data from/to files.</p>
+A simple example of an ImporterExporter is the "File Data" plugin that
+imports/exports raw binary data from/to files.</p>
 <p><code>canExport</code> and <code>canImport</code> return a boolean value indicating whether or not the
 plugin is capable of importing or exporting (e.g. you might want a plugin that
 can import data but not export it.) You can return <code>false</code> in both methods, but
 that would be impolite.</p>
-<p><code>importBits</code> and <code>exportBits</code> both receive a map of arguments (which might be
-empty) and a pointer to a <code>QWidget</code> that should be used as the parent to any GUI
-elements generated by the plugin (e.g. a file dialog.) </p>
-<p><code>exportBits</code> also receives a bit container that should be exported.</p>
-<p><code>importBits</code> returns a non-empty bit container if it was successful at importing
-data.</p>
+<p><code>importBits</code> and <code>exportBits</code> both receive <code>QJsonObject</code> parameters, and an
+<code>ActionProgress</code> instance.</p>
+<p><code>exportBits</code> also receives a bit container that should be exported. It returns
+an <code>ExportResult</code> with the <code>QJsonObject</code> parameters that will enable the
+operation to be duplicated exactly.</p>
+<p><code>importBits</code> returns a non-empty bit container in its <code>ImportResult</code>if it was
+successful at importing data along with the <code>QJsonObject</code> parameters.</p>
 <h2 id="helpful-tools">Helpful Tools</h2>
 <p>In order to simplify the process of developing plugins, there are Qt Creator
 wizards that take care of most of the boilerplate code.</p>
