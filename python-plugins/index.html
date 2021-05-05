@@ -155,7 +155,10 @@ to the hobbits binary.) For example, you could add display plugin files like:</p
  files/libraries can be found (array of strings)</li>
 <li><code>parameters</code> - the parameters that are required by the plugin. It is an
  array of parameter objects, each of which contains a <code>name</code> field (string)
- and a <code>type</code> field (<code>"string"</code>, <code>"integer"</code>, <code>"decimal"</code>, or <code>"boolean"</code>)</li>
+ and a <code>type</code> field (<code>"string"</code>, <code>"integer"</code>, <code>"decimal"</code>, or <code>"boolean"</code>).
+ Optionally, a parameter object can list all valid values in an array in a
+ <code>possible_values</code> field, or, in the case of <code>"integer"</code> and <code>"decimal"</code> types,
+ specify minimum and maximum values in the <code>min</code> and <code>max</code> fields. </li>
 </ul>
 <p>Here's an example JSON file:</p>
 <pre><code>{
@@ -172,6 +175,28 @@ to the hobbits binary.) For example, you could add display plugin files like:</p
         }
     ]
 }
+</code></pre>
+
+<p>Here's a more complicated parameter list:</p>
+<pre><code>&quot;parameters&quot;: [
+    {
+        &quot;name&quot;: &quot;hero&quot;,
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;possible_values&quot;: [
+            &quot;Sam&quot;,
+            &quot;Frodo&quot;,
+            &quot;Merry&quot;,
+            &quot;Pippin&quot;,
+            &quot;Bilbo
+        ]
+    },
+    {
+        &quot;name&quot;: &quot;breakfast_count&quot;,
+        &quot;type&quot;: &quot;integer&quot;,
+        &quot;min&quot;: 2,
+        &quot;max&quot;: 10
+    }
+]
 </code></pre>
 
 <p>Display plugins can optionally set their <code>render_config</code> (default values shown):</p>
@@ -200,6 +225,13 @@ named <code>import_bits</code> that takes the following parameters (in order):</
 <ul>
 <li>A <code>hobbits.BitArray</code> that will be the imported bits</li>
 <li>A <code>hobbits.BitInfo</code> that will be the  imported bits info/metadata</li>
+<li>A parameter for each parameter object specified in the <code>"parameters"</code> array of the JSON configuration</li>
+<li>A <code>hobbits.ActionProgess</code> that can be used to update progress and check for cancellation</li>
+</ul>
+<p>Similarly, an <code>"exporter"</code> type plugin must have a function named <code>export_bits</code>
+that takes:</p>
+<ul>
+<li>A <code>hobbits.ImmutableBitContainer</code> that will be exported</li>
 <li>A parameter for each parameter object specified in the <code>"parameters"</code> array of the JSON configuration</li>
 <li>A <code>hobbits.ActionProgess</code> that can be used to update progress and check for cancellation</li>
 </ul>
@@ -242,7 +274,7 @@ that takes:</p>
 <li><code>BitArray.resize(n)</code> resizes the <code>BitArray</code> to length <code>n</code></li>
 <li><code>BitArray.set(i, x)</code> sets the <code>i</code>th bit to boolean value <code>x</code></li>
 <li><code>BitArray.read_bytes(i, n)</code> reads <code>n</code> bytes starting from the <code>i</code>th byte and returns the value as a Python <code>bytearray</code></li>
-<li><code>BitArray.set_bytes(i, x)</code> writes <code>bytearray</code> <code>x</code> to the <code>BitArray</code> starting at the <code>i</code>th byte</li>
+<li><code>BitArray.set_bytes(i, x)</code> writes bytes-like object <code>x</code> to the <code>BitArray</code> starting at the <code>i</code>th byte</li>
 <li><code>BitArray.write_to(fname)</code> writes the contents of the <code>BitArray</code> to a file named <code>fname</code></li>
 <li><code>BitArray.read_from(i, fname)</code> reads the contents of the file named <code>fname</code> into the <code>BitArray</code> starting at the <code>BitArray</code>'s <code>i</code>th byte</li>
 <li><code>hobbits.ImmutableBitArray</code> only supports <code>size</code>, <code>at</code>, <code>read_bytes</code>, and <code>write_to</code></li>

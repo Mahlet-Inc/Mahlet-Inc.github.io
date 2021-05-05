@@ -191,7 +191,7 @@ implementation of <code>AbstractParameterEditor</code> for editing the parameter
 For most plugins, it is best to follow the pattern used in the Qt Creator plugin
 templates that does the following:</p>
 <ul>
-<li>Create Qt Designed Form class that implementes <code>AbstractParameterEditor</code></li>
+<li>Create Qt Designer Form class that implementes <code>AbstractParameterEditor</code></li>
 <li>Use a <code>ParameterHelper</code> to wrap each of the UI elements for easy
    <code>QJsonObject</code> getting and setting.</li>
 <li>Emit <code>AbstractParameterEditor</code>'s <code>changed</code> signal whenever the UI changes.</li>
@@ -293,9 +293,12 @@ operation to be duplicated exactly.</p>
 <p><code>importBits</code> returns a non-empty bit container in its <code>ImportResult</code>if it was
 successful at importing data along with the <code>QJsonObject</code> parameters.</p>
 <h2 id="helpful-tools">Helpful Tools</h2>
-<p>In order to simplify the process of developing plugins, there are Qt Creator
-wizards that take care of most of the boilerplate code.</p>
-<p>The wizards can be installed using the wizard_installer.sh script.</p>
+<p>In order to simplify the process of developing plugins, there are
+<a href="https://cookiecutter.readthedocs.io/en/latest/">cookiecutter</a>
+that take care of most of the boilerplate code.</p>
+<p>You can install cookiecutter in your development machine's python environment
+with <code>pip install cookiecutter</code> and then create the boilerplate code with
+<code>cookiecutter &lt;path to cookiecutter&gt;</code></p>
 <h2 id="get-in-touch">Get in touch</h2>
 <p>If you are having trouble making a plugin, or if you have a suggestion for
 the hobbits API or documentation please open an issue on
