@@ -140,6 +140,7 @@ Operators, and Importer/Exporters. This document will cover general plugin
 implementation concepts, and then walk through the development process for each
 type of plugin.</p>
 <h2 id="example-plugin-development-video">Example Plugin Development Video</h2>
+<p>This video is out-of-date, but some of the concepts still apply.</p>
 <p><img alt="YOUTUBE" src="Dg3vknwLO74" /></p>
 <h2 id="general-terms-and-concepts">General Terms and Concepts</h2>
 <h3 id="qt-plugin-api">Qt Plugin API</h3>
@@ -184,16 +185,17 @@ a container's updated <code>BitInfo</code> in the
 <code>AnalyzerResult</code>s that they return.</p>
 <h3 id="parameters-delegates-and-editors">Parameters, Delegates, and Editors</h3>
 <p>Most plugins require customizable parameters in order to perform their function.
-Parameters are provided as <code>QJsonObject</code>s in the code so that they can be easily
-serialized. Most plugins provide a <code>ParameterDelegate</code> that provides details and
-validation capabilities for the JSON parameters, and optionally provides an
+The <code>Parameters</code> class is essentially a nullable <code>QJsonObject</code>, so it is 
+fairly generic, and it is simple
+to serialize. Most plugins provide a <code>ParameterDelegate</code> that provides details
+and validation capabilities for the JSON parameters, and optionally provides an
 implementation of <code>AbstractParameterEditor</code> for editing the parameters in a GUI.
 For most plugins, it is best to follow the pattern used in the Qt Creator plugin
 templates that does the following:</p>
 <ul>
 <li>Create Qt Designer Form class that implementes <code>AbstractParameterEditor</code></li>
 <li>Use a <code>ParameterHelper</code> to wrap each of the UI elements for easy
-   <code>QJsonObject</code> getting and setting.</li>
+   <code>Parameters</code> getting and setting.</li>
 <li>Emit <code>AbstractParameterEditor</code>'s <code>changed</code> signal whenever the UI changes.</li>
 <li>If the editor needs to react to or enrich <code>BitContainer</code> metadata, implement
    <code>previewBitsUiImpl</code>. <code>previewBitsImpl</code> can also be used for off-thread
@@ -207,6 +209,16 @@ templates that does the following:</p>
    This is the <code>ParameterDelegate</code> that would then get returned in, for example,
    in <code>AnalyzerInterface::parameterDelegate</code>.</li>
 </ul>
+<p>If a plugin takes no parameters the <code>Parameters</code> should be empty, but <em>not</em>
+null. Invalid/null parameters are created with <code>Parameters::nullParameters</code>
+and indicate that the parameters are not suitable for use. This null state
+can be checked with <code>Parameters::isNull</code>. This check is usually unneccessary
+within the plugin itself (a well-behaved plugin runner will not pass null
+parameters in), but a plugin can return null <code>Parameters</code> in its result if it
+wants to communicate that the action it just did can not/should not be repeated
+(i.e. it is somehow non-deterministic, or utilizes an unreliable external
+service.) A well-behaved runner will not create and run batches with plugin
+actions that return null <code>Parameters</code>.</p>
 <h3 id="action-progress">Action Progress</h3>
 <p>The <code>ActionProgress</code> parameter is passed to some of the core plugin methods. It
 allows a plugin to report its percentage progress as it executes, and allows it
@@ -235,10 +247,10 @@ outputs. Most operators are 1-in, 1-out, but the flexibility of the interface
 enables several critical operations (e.g. data generators, muxes, demuxes.)
 The output of operators will go into new containers so that the original data
 can still be easily referenced.</p>
-<p><code>operateOnBits</code> takes a list of read-only bit containers, <code>QJsonObject</code>
-parameters, and an <code>ActionProgress</code> instance. It returns an <code>OperatorResult</code>
+<p><code>operateOnBits</code> takes a list of read-only bit containers, <code>Parameters</code>, and an
+<code>ActionProgress</code> instance. It returns an <code>OperatorResult</code>
 which contains any new bit containers that have been created by the operator,
-and the <code>QJsonObject</code> parameters that will enable the operation to be duplicated
+and the <code>Parameters</code> that will enable the operation to be duplicated
 exactly. This method may be executed on a secondary thread (see
 <a href="#threads">threads guidance above</a>)</p>
 <p><code>getMinInputContainers</code> and <code>getMaxInputContainers</code> return the minimum and
@@ -248,10 +260,10 @@ of these functions.</p>
 <h3 id="analyzer-interface">Analyzer Interface</h3>
 <p>Analyzers digest and decorate the data in a way that facilitates follow-on
 processing and/or human evaluation.</p>
-<p><code>analyzeBits</code> takes a read-only bit container, <code>QJsonObject</code> parameters, and an
+<p><code>analyzeBits</code> takes a read-only bit container, <code>Parameters</code>, and an
 <code>ActionProgress</code> instance. It returns an <code>AnalyzerResult</code> which contains new
-general metadata and range entries for the container, and the <code>QJsonObject</code>
-parameters that will enable the operation to be duplicated exactly. This method
+general metadata and range entries for the container, and the <code>Parameters</code>
+that will enable the operation to be duplicated exactly. This method
 may be executed on a secondary thread (see <a href="#threads">threads guidance above</a>)</p>
 <h3 id="display-interface">Display Interface</h3>
 <p>Displays show the data in some sort of useful format (e.g. a bit raster, or a
@@ -268,9 +280,9 @@ the current bit container), or set (e.g. the bit that is currently being hovered
 over by the mouse.) It also lets the display set things like the currently
 displayed range of bits with <code>DisplayHandle::setRenderedRange</code>.</p>
 <p><code>renderDisplay</code> is the primary display rendering function that takes the a
-viewport size, <code>QJsonObject</code> parameters, and an <code>ActionProgress</code> instance. It
-returns a <code>DisplayResult</code> which contains a <code>QImage</code> and the <code>QJsonObject</code>
-parameters that will enable the operation to be duplicated exactly. This method
+viewport size, <code>Parameters</code>, and an <code>ActionProgress</code> instance. It
+returns a <code>DisplayResult</code> which contains a <code>QImage</code> and the <code>Parameters</code>
+that will enable the operation to be duplicated exactly. This method
 may be executed on a secondary thread (see <a href="#threads">threads guidance above</a>)</p>
 <p><code>renderOverlay</code> is similar to <code>renderDisplay</code>, but it does not receive an
 <code>ActionProgress</code>. An overlay is generally something that might get adjusted more
@@ -285,20 +297,20 @@ imports/exports raw binary data from/to files.</p>
 plugin is capable of importing or exporting (e.g. you might want a plugin that
 can import data but not export it.) You can return <code>false</code> in both methods, but
 that would be impolite.</p>
-<p><code>importBits</code> and <code>exportBits</code> both receive <code>QJsonObject</code> parameters, and an
+<p><code>importBits</code> and <code>exportBits</code> both receive <code>Parameters</code>, and an
 <code>ActionProgress</code> instance.</p>
 <p><code>exportBits</code> also receives a bit container that should be exported. It returns
-an <code>ExportResult</code> with the <code>QJsonObject</code> parameters that will enable the
+an <code>ExportResult</code> with the <code>Parameters</code> that will enable the
 operation to be duplicated exactly.</p>
 <p><code>importBits</code> returns a non-empty bit container in its <code>ImportResult</code>if it was
-successful at importing data along with the <code>QJsonObject</code> parameters.</p>
+successful at importing data along with the <code>Parameters</code>.</p>
 <h2 id="helpful-tools">Helpful Tools</h2>
 <p>In order to simplify the process of developing plugins, there are
-<a href="https://cookiecutter.readthedocs.io/en/latest/">cookiecutter</a>
+<a href="https://cookiecutter.readthedocs.io/en/latest/">cookiecutters</a>
 that take care of most of the boilerplate code.</p>
-<p>You can install cookiecutter in your development machine's python environment
-with <code>pip install cookiecutter</code> and then create the boilerplate code with
-<code>cookiecutter &lt;path to cookiecutter&gt;</code></p>
+<p>Visit the
+<a href="https://github.com/Mahlet-Inc/hobbits-cookiecutters">GitHub repository for Hobbits plugin cookiecutters</a>
+for a variety of useful cookiecutters and instructions for how to use them.</p>
 <h2 id="get-in-touch">Get in touch</h2>
 <p>If you are having trouble making a plugin, or if you have a suggestion for
 the hobbits API or documentation please open an issue on
